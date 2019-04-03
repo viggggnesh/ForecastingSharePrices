@@ -1,35 +1,115 @@
+#Import required modules
+import math
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
-import numpy as np
-import math
+import sklearn
+import statsmodels.tsa.seasonal as sm
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.stattools import acf, pacf
-import statsmodels.tsa.stattools as ts
-from statsmodels.tsa.stattools import ARMA
-from pyramid.arima import auto_arima
+from statsmodels.tsa.arima_model import ARIMA
+from pmdarima.arima.utils import ndiffs
 
-data = pd.read_csv("2014.csv")
+#Load dataset and plot
+data = pd.read_csv('2016.csv')
+data = data[['Open','High','Low','Close']]
 
-x = data['Date']
-y = data['Turnover (Rs. Cr)']
+#Plot the label we want to predict and check for its seasonality
+#Seasonality can be predicted using statistical methods or ADF test
+#In this module, the ADF test has been taken, as it is more accurate in assessing whether the data is stationary or not.
+rolmean = data.Close.rolling(12).mean()
+rolstd = data.Close.rolling(12).std()
+plt.plot(data.Close)
+plt.plot(rolmean,color='red')
+plt.plot(rolstd, color='black')
+plt.title('Rolling Statistics vs Time Series')
+plt.show()
+result = adfuller(data.Close, autolag='AIC')
+print('ADF Statistic: %f'% result[0])
+print('p-value: %f'% result[1])
+print('#Lags Used: ', result[2])
+print('Observations Used: ', result[3])
+print('Critical Values:')
+for key, value in result[4].items():
+	print('\t%s: %.3f' % (key, value))
 
-result = seasonal_decompose(x,y,model='multiplicative')
+#Plot the ACF value
+plot_acf(data.Close)
+plt.show()
 
-fig = result.plot()
+#Prints the required order of differencing to make the data stationary
+#The suggested value may not be the best differencing for the dataset
+#However, using more than the suggested difference will make the data overstationary and unfit for use
+print('Best value of difference to use is - ',ndiffs(data.Close,test='adf'))
 
-fig.show()
+#Plor MA of the log
+data1 = np.log(data[['Close']])
+moving_avg = data1.rolling(12).mean()
+plt.plot(data1)
+plt.plot(moving_avg, color='red')
+plt.show()
 
-model = auto_arima(data, start_p=1, start_q=1, max_p=3, max_q=3, m=12, start_P=0, seasonal=True, d=1, D=1, trace=True, error_action='ignore', suppress_warnings=True, stepwise=True)
-print(model.aic())
+#Take the moving average of the data by subtracting the moving average for 12 time units from the original data
+series_ma = data1 - moving_avg
+series_ma.dropna(inplace=True)
 
-train = data.loc['1985-01-01':'2016-12-01']
-test = data.loc['2017-01-01':]
+#Perfrom rolling statistics and the ADF test again on the log values
+rolmean = series_ma.rolling(12).mean()
+rolstd = series_ma.rolling(12).std()
+plt.plot(series_ma)
+plt.plot(rolmean,color='red')
+plt.plot(rolstd, color='black')
+plt.title('Rolling Statistics vs Log Transform')
+plt.show()
+series_ma = series_ma.iloc[:,0].values
+result = adfuller(series_ma, autolag='AIC')
+print('ADF Statistic: %f'% result[0])
+print('p-value: %f'% result[1])
+print('#Lags Used: ', result[2])
+print('Observations Used: ', result[3])
+print('Critical Values:')
+for key, value in result[4].items():
+	print('\t%s: %.3f' % (key, value))
 
-future_forecast = stepwise_model.predict(n_periods=37)
-future_forecast = pd.DataFrame(future_forecast,index = test.index,columns=['Prediction'])
-pd.concat([test,future_forecast],axis=1).iplot()
-pd.concat([data,future_forecast],axis=1).iplot()
+#Perform order differencing based on ndiffs using .shift() method
+ts_log_diff = data1 - data1.shift()
+ts_log_diff.dropna(inplace=True)
+plt.plot(ts_log_diff)
+plt.title('After Log Differencing')
+plt.show()
+rolmean = ts_log_diff.rolling(12).mean()
+rolstd = ts_log_diff.rolling(12).std()
+plt.plot(ts_log_diff)
+plt.plot(rolmean,color='red')
+plt.plot(rolstd, color='black')
+plt.title('Rolling Statistics vs Log Differencing')
+plt.show()
+ts_log_diff = ts_log_diff.iloc[:,0].values
+result = adfuller(ts_log_diff, autolag='AIC')
+print('ADF Statistic: %f' % result[0])
+print('p-value: %f'% result[1])
+print('#Lags Used: ', result[2])
+print('Observations Used: ', result[3])
+print('Critical Values:')
+for key, value in result[4].items():
+	print('\t%s: %.3f' % (key, value))
+
+#Plot ACF:
+plot_acf(ts_log_diff, lags=20)
+plt.title('Autocorrelation Function')
+
+#Plot PACF:
+plot_pacf(ts_log_diff, lags=20, method='ols')
+plt.title('Partial Autocorrelation Function')
+plt.show()
+
+#Plot ARIMA
+model = ARIMA(data.Close, order=(2, 1, 2))
+results_ARIMA = model.fit(disp=-1)
+plt.plot(data.Close)
+plt.plot(results_ARIMA.fittedvalues, color='red')
+plt.show()
 
 
 
