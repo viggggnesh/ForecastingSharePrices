@@ -110,6 +110,3 @@ results_ARIMA = model.fit(disp=-1)
 plt.plot(data.Close)
 plt.plot(results_ARIMA.fittedvalues, color='red')
 plt.show()
-
-
-
