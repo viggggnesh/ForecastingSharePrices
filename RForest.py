@@ -69,4 +69,3 @@ mse = mean_squared_error(dy_true,dy_predicted)
 print('Mean Squared Error - ',mse)
 print('Mean Average Percent Error - ',mape)
 print('Estimated Accuracy - ',(100-mape))
-
