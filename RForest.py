@@ -6,7 +6,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn import tree
 
 #Open dataset to read from
-data = pd.read_csv('2009.csv')
+data = pd.read_csv('2016.csv')
 data = data[['Open','High','Low','Close']]
 
 #Plot all the concerned attributes to establish correlation
@@ -20,11 +20,11 @@ dX = data[['Open','High','Low']]
 dy = data[['Close']]
 
 #Split data into train and test
-dX_train = dX[dX.index < 198]
-dy_train = dy[dy.index < 198]
+dX_train = dX[dX.index < 181]
+dy_train = dy[dy.index < 181]
 
-dX_test = dX[dX.index >= 198]
-dy_test = dy[dy.index >= 198]
+dX_test = dX[dX.index >= 181]
+dy_test = dy[dy.index >= 181]
 
 #Initiate Random Forest Model which makes use of 3 features to predict 'Close' for given data
 RF_Model = RandomForestRegressor(n_estimators=100, max_features=3, oob_score=True)
