@@ -9,6 +9,8 @@ from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.statespace import sarimax
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from pmdarima.arima.utils import ndiffs
 
 #Load dataset and plot
@@ -18,8 +20,8 @@ data = data[['Open','High','Low','Close']]
 #Plot the label we want to predict and check for its seasonality
 #Seasonality can be predicted using statistical methods or ADF test
 #In this module, the ADF test has been taken, as it is more accurate in assessing whether the data is stationary or not.
-rolmean = data.Close.rolling(12).mean()
-rolstd = data.Close.rolling(12).std()
+rolmean = data.Close.rolling(30).mean()
+rolstd = data.Close.rolling(30).std()
 plt.plot(data.Close)
 plt.plot(rolmean,color='red')
 plt.plot(rolstd, color='black')
@@ -43,9 +45,9 @@ plt.show()
 #However, using more than the suggested difference will make the data overstationary and unfit for use
 print('Best value of difference to use is - ',ndiffs(data.Close,test='adf'))
 
-#Plor MA of the log
+#Plot MA of the log
 data1 = np.log(data[['Close']])
-moving_avg = data1.rolling(12).mean()
+moving_avg = data1.rolling(30).mean()
 plt.plot(data1)
 plt.plot(moving_avg, color='red')
 plt.show()
@@ -55,8 +57,8 @@ series_ma = data1 - moving_avg
 series_ma.dropna(inplace=True)
 
 #Perfrom rolling statistics and the ADF test again on the log values
-rolmean = series_ma.rolling(12).mean()
-rolstd = series_ma.rolling(12).std()
+rolmean = series_ma.rolling(30).mean()
+rolstd = series_ma.rolling(30).std()
 plt.plot(series_ma)
 plt.plot(rolmean,color='red')
 plt.plot(rolstd, color='black')
@@ -78,8 +80,8 @@ ts_log_diff.dropna(inplace=True)
 plt.plot(ts_log_diff)
 plt.title('After Log Differencing')
 plt.show()
-rolmean = ts_log_diff.rolling(12).mean()
-rolstd = ts_log_diff.rolling(12).std()
+rolmean = ts_log_diff.rolling(30).mean()
+rolstd = ts_log_diff.rolling(30).std()
 plt.plot(ts_log_diff)
 plt.plot(rolmean,color='red')
 plt.plot(rolstd, color='black')
@@ -105,8 +107,14 @@ plt.title('Partial Autocorrelation Function')
 plt.show()
 
 #Plot ARIMA
-model = ARIMA(data.Close, order=(2, 1, 2))
-results_ARIMA = model.fit(disp=-1)
+model = ARIMA(ts_log_diff, order=(5, 1, 5))
+results_ARIMA = model.fit(disp=1)
 plt.plot(data.Close)
 plt.plot(results_ARIMA.fittedvalues, color='red')
 plt.show()
+print(results_ARIMA.fittedvalues)
+
+'''#Print MAE, MAPE and Accuracy
+print('Mean Squared Error - ',mse)
+print('Mean Average Percent Error - ',mape)
+print('Estimated Accuracy - ',(100-mape))'''

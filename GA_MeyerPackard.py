@@ -1,12 +1,15 @@
+#Import required modules
 import numpy
 import random
 import operator
 import csv
 import pandas
+import matplotlib.pyplot as plt
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-random.seed(a=None)
 
 # Set constants
+random.seed(a=None)
 PopulationSize = 200
 DataSize = 0
 MutationRate = 0
@@ -256,3 +259,19 @@ if __name__ == '__main__':
     x.weighted_random_choice()
     x.uniformCross(MutationRate)
     x.printChromosomes()
+
+    data = pandas.read_csv('2016.csv', nrows=199)
+    data = data[['Close']]
+
+    data_predicted = pandas.read_csv('closePrices.csv')
+    data_predicted = data_predicted[['Score']]
+    plt.plot(data)
+    plt.plot(data_predicted)
+    plt.show()
+
+    mape = mean_absolute_error(data, data_predicted)
+    mse = mean_squared_error(data, data_predicted)
+
+    # Print MAE, MAPE and Accuracy
+    print('Mean Squared Error - ', mse)
+    print('Mean Average Percent Error - ', mape)

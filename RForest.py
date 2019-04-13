@@ -1,4 +1,6 @@
+#Import required modules
 import numpy as np
+from math import sqrt
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.ensemble.forest import RandomForestRegressor
@@ -68,4 +70,3 @@ mse = mean_squared_error(dy_true,dy_predicted)
 #Print MAE, MAPE and Accuracy
 print('Mean Squared Error - ',mse)
 print('Mean Average Percent Error - ',mape)
-print('Estimated Accuracy - ',(100-mape))
