@@ -107,7 +107,7 @@ plt.title('Partial Autocorrelation Function')
 plt.show()
 
 #Plot ARIMA
-model = ARIMA(ts_log_diff, order=(5, 1, 5))
+model = ARIMA(ts_log_diff, order=(5, 1, 0))
 results_ARIMA = model.fit(disp=1)
 plt.plot(data.Close)
 plt.plot(results_ARIMA.fittedvalues, color='red')
