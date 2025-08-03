@@ -9,3 +9,5 @@ The attempt was to -
 Models chosen were - `ARIMA, RandomForest, MLP, Holt-Winters and Genetic Algorithm`
 The method of comparison is by taking their MSE and MAPE and comparing them.
 ### Dataset has been taken from NIFTY50 from the NSE India Website.
+
+ The final report was compiled as a review of forecasting models and a comparison of short-term results, which can be found [here](https://www.researchgate.net/publication/335606093_FORECASTING_SHARE_PRICES_USING_SOFT_COMPUTING_TECHNIQUES).
