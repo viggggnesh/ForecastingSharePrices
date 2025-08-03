@@ -1,4 +1,4 @@
-# ForecastingSharePrices
+# Forecasting share prices using computing techniques
 As part of my final year project at SRM IST for my course, I delved into the realm of forecasting and prediction modelling for basic stock data that was publicly available. 
 
 The attempt was to - 
